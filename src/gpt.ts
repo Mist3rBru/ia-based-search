@@ -1,8 +1,12 @@
-import { RetrievalQAChain } from 'langchain/chains'
 import { redisVectorStore } from './redis.js'
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai'
 import { HarmBlockThreshold, HarmCategory } from '@google/generative-ai'
 import { PromptTemplate } from '@langchain/core/prompts'
+import { StringOutputParser } from '@langchain/core/output_parsers'
+import {
+  RunnablePassthrough,
+  RunnableSequence,
+} from '@langchain/core/runnables'
 
 const chatIa = new ChatGoogleGenerativeAI({
   modelName: 'gemini-pro',
@@ -18,7 +22,7 @@ const chatIa = new ChatGoogleGenerativeAI({
 export async function askGpt(
   question: string,
   courseName: string
-): Promise<string> {
+): Promise<AsyncIterable<string>> {
   const prompt = new PromptTemplate({
     template: `
       Você responde perguntas de um curso de {courseName}.
@@ -36,14 +40,18 @@ export async function askGpt(
     partialVariables: { courseName },
   })
 
-  const chain = RetrievalQAChain.fromLLM(
+  const retrieverDocsLimit = 5
+  const chain = RunnableSequence.from([
+    {
+      context: redisVectorStore
+        .asRetriever(retrieverDocsLimit)
+        .pipe(docs => docs.map(doc => doc.pageContent).join(' ')),
+      question: new RunnablePassthrough(),
+    },
+    prompt,
     chatIa,
-    redisVectorStore.asRetriever(),
-    { prompt }
-  )
-  const response = (await chain.invoke({ query: question })) as { text: string }
+    new StringOutputParser(),
+  ])
 
-  console.log(response)
-
-  return response.text
+  return chain.stream(question)
 }

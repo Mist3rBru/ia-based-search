@@ -1,0 +1,4 @@
+- [] Indicar material correto
+- [] Limitar a disciplina
+- [] Implementar estratégias para auxiliar o aluno
+- [] Integrar com o CreadManager

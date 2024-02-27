@@ -13,7 +13,9 @@ const textTokenSplitter = new TokenTextSplitter({
 
 async function main(): Promise<void> {
   console.time('[TOTAL]')
+  // 1:35
   // const videoLink = 'https://www.youtube.com/watch?v=_YLXEiz3L_k'
+  // 15:19
   const videoLink = 'https://youtu.be/XzhGdoZ-WJk?si=pRozhLYVZdvBzbNB'
 
   console.time('[DOCS]')
@@ -28,10 +30,15 @@ async function main(): Promise<void> {
   await redisVectorStore.addDocuments(splittedTranscriptionDocs)
 
   console.time('[QUESTION]')
-  await askGpt(
+  const stream = await askGpt(
     'Como faço para alterar a imagem de capa de uma disciplina?',
     'Administração'
   )
+
+  for await (const chunk of stream) {
+    process.stdout.write(chunk)
+  }
+  process.stdout.write('\n')
   console.timeEnd('[QUESTION]')
 
   await redis.disconnect()
