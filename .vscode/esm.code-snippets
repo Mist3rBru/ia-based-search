@@ -1,0 +1,19 @@
+{
+  "esm __dirname": {
+    "scope": "typescript,javascript",
+    "prefix": "__dirname",
+    "body": [
+      "import { fileURLToPath } from 'node:url'",
+      "const __dirname = fileURLToPath(new URL('.', import.meta.url))",
+    ],
+  },
+
+  "esm __filename": {
+    "scope": "typescript,javascript",
+    "prefix": "__filename",
+    "body": [
+      "import { fileURLToPath } from 'node:url'",
+      "const __filename = fileURLToPath(import.meta.url);",
+    ],
+  },
+}

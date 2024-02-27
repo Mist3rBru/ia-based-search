@@ -1,0 +1,7 @@
+{
+  "Type?": {
+    "scope": "typescript,typescriptreact",
+    "prefix": "?",
+    "body": ["// $0^?"],
+  },
+}
